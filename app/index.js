@@ -97,7 +97,7 @@ let app = express()
   .use(cors())
   .use(bodyParser.json()) //json parser
   .use(bodyParser.urlencoded({ extended: true })) //urlencoded parser
-  .use(express.static(path.join(__dirname, "../reactapp/build"))) //path to examples
+  .use(express.static(path.join(__dirname, "../public/build"))) //path to examples
   .use("/webrtc", WebRtc(xirsys)); //watch API calls
 
 module.exports = app;
