@@ -32,7 +32,9 @@ function Main() {
   const [call, setCall] = useState(false);
   const [inCall, setInCall] = useState(false);
 
-  const { $xirsys } = Xirsys(setRemoteCallID, rstream);
+  const { xirsys } = Xirsys(setRemoteCallID, rstream);
+
+  const [$xirsys, setXirsys] = useState(xirsys);
 
   useEffect(() => {
     if (lstream) {
@@ -233,14 +235,18 @@ function Main() {
     console.log("*main*  onStopCall ");
     if (inCall) {
       peer.hangup(remoteCallID);
-      setInCall(false);
     }
+    setInCall(false);
     setRemoteCallID(null);
     setIce(null);
     setPeer(null);
     setMedia(null);
     setSig(null);
     setStartCall(false);
+    setLStream(null);
+    setRStream(new MediaStream());
+
+    // setXirsys(null);
   }
 
   /* UI METHODS */
@@ -391,8 +397,6 @@ function Main() {
     onLoad,
     lstream,
     rstream,
-    setLStream,
-    setRStream,
     onStopCall,
     startCall,
   };

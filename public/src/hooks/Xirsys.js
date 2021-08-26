@@ -866,7 +866,7 @@ function Xirsys(setRandomUser, rstream) {
     _p2p = null;
   }, []);
 
-  return { $xirsys };
+  return { xirsys: $xirsys };
 }
 
 export default Xirsys;
