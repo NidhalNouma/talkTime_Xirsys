@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 
 // Media
 
-function Xirsys(setRandomUser) {
+function Xirsys(setRandomUser, rstream) {
   const [$xirsys] = useState(new Object());
 
   useEffect(() => {
@@ -57,27 +57,29 @@ function Xirsys(setRandomUser) {
 
     _md.prototype.updateDevices = function (list) {
       console.log("*media*  updateDevices ", list);
-      if (arguments.length == 0) return;
+      if (arguments.length === 0) return;
       //set local list. dispatch event that list is updated.
       let items = { audioin: [], videoin: [] };
 
       list.forEach((device) => {
         //console.log('device: ',device);
-        if (device.deviceId == "default") {
+        if (device.deviceId === "default") {
           if (!items.defaults) items.defaults = [];
           items.defaults.push(device);
           return;
         }
         switch (device.kind) {
           case "audioinput":
-            if (device.deviceId != "default") {
+            if (device.deviceId !== "default") {
               items.audioin.push(device);
             }
             break;
           case "videoinput":
-            if (device.deviceId != "default") {
+            if (device.deviceId !== "default") {
               items.videoin.push(device);
             }
+            break;
+          default:
             break;
         }
       });
@@ -105,7 +107,7 @@ function Xirsys(setRandomUser) {
       if (!this.evtListeners.hasOwnProperty(sEvent)) return false; //end
 
       let index = this.evtListeners[sEvent].indexOf(cbFunc);
-      if (index != -1) {
+      if (index !== -1) {
         this.evtListeners[sEvent].splice(index, 1);
         return true; //else end here.
       }
@@ -155,7 +157,7 @@ function Xirsys(setRandomUser) {
       var own = this;
       var xhr = new XMLHttpRequest();
       xhr.onreadystatechange = function ($evt) {
-        if (xhr.readyState == 4 && xhr.status == 200) {
+        if (xhr.readyState === 4 && xhr.status === 200) {
           var res = JSON.parse(xhr.responseText);
           console.log("*ice*  response: ", res);
           own.iceServers = own.filterPaths(res.v.iceServers);
@@ -194,8 +196,8 @@ function Xirsys(setRandomUser) {
     _ice.prototype.cleanChPath = function (path) {
       //has slash at front
       console.log("cleanChPath path recv: " + path);
-      if (path.indexOf("/") != 0) path = "/" + path;
-      if (path.lastIndexOf("/") == path.length - 1)
+      if (path.indexOf("/") !== 0) path = "/" + path;
+      if (path.lastIndexOf("/") === path.length - 1)
         path = path.substr(0, path.lastIndexOf("/"));
       console.log("cleanChPath new path: " + path);
       return path;
@@ -214,7 +216,7 @@ function Xirsys(setRandomUser) {
       if (!this.evtListeners.hasOwnProperty(sEvent)) return false; //end
 
       var index = this.evtListeners[sEvent].indexOf(cbFunc);
-      if (index != -1) {
+      if (index !== -1) {
         this.evtListeners[sEvent].splice(index, 1);
         return true; //else end here.
       }
@@ -309,7 +311,7 @@ function Xirsys(setRandomUser) {
         },
         success: function (data) {
           own.tmpToken = data.v;
-          if (own.tmpToken == "no_namespace") {
+          if (own.tmpToken === "no_namespace") {
             console.log("*signal*  fail: ", own.tmpToken);
             return;
           }
@@ -401,7 +403,7 @@ function Xirsys(setRandomUser) {
         var payload = pkt.p; //the actual message data sent
         var meta = pkt.m; //meta object
         var msgEvent = meta.o; //event label of message
-        var toPeer = meta.t; //msg to user (if private msg)
+        // var toPeer = meta.t; //msg to user (if private msg)
         var fromPeer = meta.f; //msg from user
         if (!!fromPeer) {
           //remove the peer path to display just the name not path.
@@ -434,13 +436,15 @@ function Xirsys(setRandomUser) {
             var data = payload.msg;
             data.f = fromPeer;
             if (
-              data.type == "candidate" ||
-              data.type == "offer" ||
-              data.type == "answer" ||
-              data.type == "custom"
+              data.type === "candidate" ||
+              data.type === "offer" ||
+              data.type === "answer" ||
+              data.type === "custom"
             ) {
               own.emit(data.type, data);
             }
+            break;
+          default:
             break;
         }
         own.emit("message", msg.data);
@@ -458,7 +462,7 @@ function Xirsys(setRandomUser) {
         " info: ",
         info
       );
-      if (msg == undefined || msg.length < 1) return;
+      if (msg === undefined || msg.length < 1) return;
       var pkt = {
         t: "u", // user message service
         m: {
@@ -478,8 +482,8 @@ function Xirsys(setRandomUser) {
     //formats the custom channel path how we need it.
     _sig.prototype.cleanChPath = function (path) {
       //has slash at front
-      if (path.indexOf("/") != 0) path = "/" + path;
-      if (path.lastIndexOf("/") == path.length - 1)
+      if (path.indexOf("/") !== 0) path = "/" + path;
+      if (path.lastIndexOf("/") === path.length - 1)
         path = path.substr(0, path.lastIndexOf("/"));
       //console.log('cleanChPath new path: '+path);
       return path;
@@ -517,7 +521,7 @@ function Xirsys(setRandomUser) {
       if (!this.evtListeners.hasOwnProperty(sEvent)) return false; //end
 
       var index = this.evtListeners[sEvent].indexOf(cbFunc);
-      if (index != -1) {
+      if (index !== -1) {
         this.evtListeners[sEvent].splice(index, 1);
         return true; //else end here.
       }
@@ -599,7 +603,10 @@ function Xirsys(setRandomUser) {
       if (!!this.pc && this.stream) {
         this.isCaller = true;
         const own = this;
-        this.pc.addStream(this.stream);
+        // this.pc.addStream(this.stream);`
+        this.stream.getTracks().forEach((track) => {
+          own.pc.addTrack(track, own.stream);
+        });
         this.pc
           .createOffer()
           .then((desc) => {
@@ -616,10 +623,14 @@ function Xirsys(setRandomUser) {
       console.log("*p2p*  callPeer ", custID);
       if (this.createPeerConnection() && this.stream) {
         //this flag tells our code we are doing the calling.
+        console.log("this pc =>> ", this.pc, this);
         this.isCaller = true;
         const own = this;
         this.remotePeerID = custID;
-        this.pc.addStream(this.stream);
+        // this.pc.addStream(this.stream);
+        this.stream.getTracks().forEach((track) => {
+          own.pc.addTrack(track, own.stream);
+        });
         this.pc
           .createOffer()
           .then((desc) => {
@@ -646,7 +657,7 @@ function Xirsys(setRandomUser) {
     };
 
     _p2p.prototype.receiveOffer = function (evt, isVerfied) {
-      var verified = isVerfied == true;
+      var verified = isVerfied === true;
       var desc = evt.data;
       console.log(
         "*p2p*  receiveOffer ",
@@ -662,15 +673,18 @@ function Xirsys(setRandomUser) {
         this.emit(this.peerConnRequest, evt.data);
         return;
       }
+      var own = this;
       //if autoAnser is false and has been verfied, OR autoAnswer is true then connect us.
       if (!this.remotePeerID && !!desc.f) this.remotePeerID = desc.f;
       console.log("*p2p*  !pc ", this.pc, ", !iscaller: ", this.isCaller);
       if (!this.pc && !this.isCaller) {
         if (this.createPeerConnection() && this.stream) {
-          this.pc.addStream(this.stream);
+          // this.pc.addStream(this.stream);
+          this.stream.getTracks().forEach((track) => {
+            own.pc.addTrack(track, own.stream);
+          });
         }
       }
-      var own = this;
 
       try {
         this.pc.setRemoteDescription(new RTCSessionDescription(desc));
@@ -691,7 +705,7 @@ function Xirsys(setRandomUser) {
     _p2p.prototype.receiveAnswer = function (evt) {
       var desc = evt.data;
       console.log("*p2p*  receiveAnswer ", desc);
-      if (this.remotePeerID != desc.f) return; //not the droid were looking for.
+      if (this.remotePeerID !== desc.f) return; //not the droid were looking for.
       try {
         this.pc.setRemoteDescription(new RTCSessionDescription(desc));
       } catch (e) {
@@ -706,11 +720,19 @@ function Xirsys(setRandomUser) {
         var own = this;
         console.log("RTCPeerConnection servers:  ", this.servers);
         this.pc = new RTCPeerConnection(this.servers);
+
+        this.pc.ontrack = (event) => {
+          event.streams[0].getTracks().forEach((track) => {
+            console.log(rstream, "rstreeeeem");
+            rstream.addTrack(track);
+          });
+        };
+
         this.pc.onicecandidate = function (evt) {
           //send to peer
           var cand = evt.candidate;
           if (!cand) return;
-          if (own.forceTurn && cand.candidate.indexOf("typ relay") == -1) {
+          if (own.forceTurn && cand.candidate.indexOf("typ relay") === -1) {
             cand = null;
           } else {
             //console.log('Is Turn: ',own.forceTurn,' Candidate: ',cand);
@@ -725,10 +747,10 @@ function Xirsys(setRandomUser) {
             );
           }
         };
-        this.pc.onaddstream = (evt) => {
-          console.log("*p2p*  onaddstream ", evt);
-          own.addRemoteStream(evt.stream); //remoteStreams
-        };
+        // this.pc.onaddstream = (evt) => {
+        //   console.log("*p2p*  onaddstream ", evt);
+        //   own.addRemoteStream(evt.stream); //remoteStreams
+        // };
         this.pc.onremovestream = (evt) =>
           console.log("*p2p*  onremovestream ", evt);
         this.pc.onconnectionstatechange = (evt) =>
@@ -739,6 +761,12 @@ function Xirsys(setRandomUser) {
           console.log(
             "*p2p*  oniceconnectionstatechange: " + own.pc.iceConnectionState
           );
+
+          // this.pc.ontrack = (event) => {
+          //   event.streams[0].getTracks().forEach((track) => {
+          //     own.addTrack(track);
+          //   });
+          // };
 
           switch (own.pc.iceConnectionState) {
             case "checking":
@@ -753,6 +781,8 @@ function Xirsys(setRandomUser) {
             case "closed":
               own.pc = null;
               console.log("pc: ", own.pc);
+              break;
+            default:
               break;
           }
         };
@@ -772,6 +802,12 @@ function Xirsys(setRandomUser) {
       this.isCaller = false;
       //if no streams close and nulify pc.
       //this.pc = null;
+    };
+
+    _p2p.prototype.addTrack = function (track) {
+      this.remoteStreams[this.remotePeerID] = track;
+      this.emit(this.peerConnSuccess, this.remotePeerID);
+      this.isCaller = false;
     };
 
     _p2p.prototype.addRemoteStream = function (remoteStream) {

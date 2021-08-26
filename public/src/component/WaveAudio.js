@@ -33,7 +33,7 @@ function WaveAudio({ stream, lstream }) {
         colors: ["rgba(45, 134, 233, 1)", "white", "blue"],
       });
 
-    // console.log("Start streaming audio ...");
+    console.log("Start streaming audio ...,", stream);
 
     audio.current.srcObject = stream;
     return () => {

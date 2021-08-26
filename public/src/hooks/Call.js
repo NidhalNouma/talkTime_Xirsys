@@ -12,7 +12,9 @@ function Call() {
   };
 
   const answer = function () {
-    state === 1 && (setState(2) || setBtnText("End"));
+    console.log("answer fire");
+    setState(2);
+    setBtnText("End");
   };
 
   return { state, click, btnText, answer };

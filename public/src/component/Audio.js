@@ -5,8 +5,17 @@ import WaveAudio from "./WaveAudio";
 import Main from "../hooks/Main1";
 
 function Audio({ type = 0, answer }) {
-  const { onLoad, lstream, rstream, setRStream, setLStream, onStopCall } =
-    Main();
+  const {
+    onLoad,
+    lstream,
+    rstream,
+    setRStream,
+    setLStream,
+    onStopCall,
+    startCall,
+  } = Main();
+
+  const [stream, setStream] = useState(null);
 
   useEffect(() => {
     if (type === 0) {
@@ -19,20 +28,41 @@ function Audio({ type = 0, answer }) {
       onLoad();
     }
 
-    if (rstream) {
+    if (type !== 2) setStream(null);
+  }, [type]);
+
+  useEffect(() => {
+    if (startCall) {
       answer();
     }
-  }, [type, rstream]);
+  }, [startCall]);
+
+  // useEffect(() => {
+  //   console.log("r ===>> ", rstream);
+  //   if (rstream.active) {
+  //     answer();
+  //   }
+  // }, [rstream]);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      const s = rstream;
+      if (s) {
+        // console.log("rstream s ===>> ", s);
+        if (s.active) {
+          console.log("answer call");
+          setStream(s);
+          answer();
+        }
+      }
+    }, 5000);
+    return () => clearInterval(interval);
+  }, []);
 
   return type === 1 ? (
-    <Loader
-      type="ThreeDots"
-      color="rgba(102, 193, 113, 1)"
-      height={100}
-      width={100}
-    />
-  ) : type === 2 ? (
-    <WaveAudio stream={rstream} lstream={lstream} />
+    <Loader type="Bars" color="rgba(102, 193, 113, 1)" height={80} width={80} />
+  ) : type === 2 && stream ? (
+    <WaveAudio stream={stream} lstream={lstream} />
   ) : (
     <div></div>
   );

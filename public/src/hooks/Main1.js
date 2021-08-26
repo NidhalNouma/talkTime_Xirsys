@@ -3,14 +3,14 @@ import Xirsys from "./Xirsys";
 import { useState, useEffect } from "react";
 
 function Main() {
-  const location = {};
+  // const location = {};
 
   //custom: check URL for "ch" var, and set the channel accourdingly
   var channelPath = ""; //set this variable to specify a channel path
-  var ch = decodeURI(
-    (RegExp("ch" + "=" + "(.+?)(&|$)").exec(location.search) || [, null])[1]
-  );
-  if (ch != "null") channelPath = ch;
+  // var ch = decodeURI(
+  //   (RegExp("ch" + "=" + "(.+?)(&|$)").exec(location.search) || [, null])[1]
+  // );
+  // if (ch != "null") channelPath = ch;
   console.log("channel path: ", channelPath);
 
   var mediaConstraints = {
@@ -18,9 +18,11 @@ function Main() {
   };
 
   const [lstream, setLStream] = useState(null);
-  const [rstream, setRStream] = useState(null);
+  const [rstream, setRStream] = useState(new MediaStream());
   const [username, setUsername] = useState(null);
   const [remoteCallID, setRemoteCallID] = useState(null);
+
+  const [startCall, setStartCall] = useState(false);
 
   const [peer, setPeer] = useState(null);
   const [sig, setSig] = useState(null);
@@ -30,7 +32,7 @@ function Main() {
   const [call, setCall] = useState(false);
   const [inCall, setInCall] = useState(false);
 
-  const { $xirsys } = Xirsys(setRemoteCallID);
+  const { $xirsys } = Xirsys(setRemoteCallID, rstream);
 
   useEffect(() => {
     if (lstream) {
@@ -49,6 +51,7 @@ function Main() {
       peer.on(peer.peerConnSuccess, onStartCall);
       console.log("peer ", peer);
     }
+    console.log("peer ", peer);
   }, [peer]);
 
   useEffect(() => {
@@ -73,7 +76,7 @@ function Main() {
   useEffect(() => {
     console.log("remote Id == ", remoteCallID);
 
-    if (sig) doSignal();
+    if (sig && remoteCallID && remoteCallID !== username) doSignal();
   }, [remoteCallID]);
   //if there is no remoteCallID show sharable link to call user.
 
@@ -97,7 +100,7 @@ function Main() {
 
   function onICE(evt) {
     console.log("onICE ", evt);
-    if (evt.type == ice.onICEList) {
+    if (evt.type === ice.onICEList) {
       //   getMyMedia();
       setMedia(new $xirsys.media());
     }
@@ -117,6 +120,7 @@ function Main() {
       .getUserMedia(mediaConstraints)
       .then((str) => {
         console.log("*main*  getUser Media stream: ", str);
+
         setLocalStream(str);
         //create signal if null
         // if (!sig) doSignal();
@@ -139,7 +143,7 @@ function Main() {
       let payload = pkt.p; //the actual message data sent
       let meta = pkt.m; //meta object
       let msgEvent = meta.o; //event label of message
-      let toPeer = meta.t; //msg to user (if private msg)
+      // let toPeer = meta.t; //msg to user (if private msg)
       let fromPeer = meta.f; //msg from user
       //remove the peer path to display just the name not path.
       if (!!fromPeer) {
@@ -162,7 +166,7 @@ function Main() {
           break;
         //peer gone.
         case "peer_removed":
-          if (fromPeer == remoteCallID) onStopCall();
+          if (fromPeer === remoteCallID) onStopCall();
           break;
 
         // new peer connected
@@ -173,6 +177,8 @@ function Main() {
         //case 'message':
         // 	onUserMsg(payload.msg, fromPeer, toPeer);
         // 	break;
+        default:
+          break;
       }
     });
   }
@@ -181,7 +187,7 @@ function Main() {
   function onReady() {
     console.log("* onReady!");
     // setup peer connector, pass signal, our media and iceServers list.
-    let isTURN = getURLParameter("isTURN") == "true"; //get force turn var.
+    let isTURN = getURLParameter("isTURN") === "true"; //get force turn var.
     console.log("isTURN ", isTURN);
     setPeer(
       new $xirsys.p2p(
@@ -215,6 +221,7 @@ function Main() {
     setPeer(null);
     setMedia(null);
     setSig(null);
+    setStartCall(false);
   }
 
   /* UI METHODS */
@@ -230,8 +237,14 @@ function Main() {
   function setRemoteStream(str) {
     console.log("*main*  setRemoteStream & Video obj ", str);
     // remoteStream = str;
-    setRStream(str);
-    // remoteVideoEl.srcObject = str;
+    console.log($xirsys.pc, "PC");
+    // $xirsys.pc.ontrack = (event) => {
+    //   event.streams[0].getTracks().forEach((track) => {
+    //     rstream.addTrack(track);
+    //   });
+    // };
+    // setRStream(str);
+    setStartCall(true);
   }
   //update the list of media sources on UI
   function onMediaDevices(e) {
@@ -243,6 +256,8 @@ function Main() {
       case media.ON_LOCAL_STREAM:
         //update list with selected.
         setSelectedDevices(e.data.getTracks());
+        break;
+      default:
         break;
     }
   }
@@ -300,26 +315,28 @@ function Main() {
             device.label.substr(0, 20) + '<span class="caret"></span>'
           );
           break;
+        default:
+          break;
       }
     });
   }
 
   /* TOOLS */
 
-  function hasMedia(label, tracks) {
-    console.log("tracks: ", tracks, ", label: ", label);
-    let l = tracks.length,
-      i,
-      hasIt = false;
-    for (i = 0; i < l; i++) {
-      let track = tracks[i];
-      if (track.label.indexOf(label) > -1) {
-        hasIt = true;
-        break;
-      }
-    }
-    return hasIt;
-  }
+  // function hasMedia(label, tracks) {
+  //   console.log("tracks: ", tracks, ", label: ", label);
+  //   let l = tracks.length,
+  //     i,
+  //     hasIt = false;
+  //   for (i = 0; i < l; i++) {
+  //     let track = tracks[i];
+  //     if (track.label.indexOf(label) > -1) {
+  //       hasIt = true;
+  //       break;
+  //     }
+  //   }
+  //   return hasIt;
+  // }
 
   //gets URL parameters
   function getURLParameter(name) {
@@ -351,7 +368,15 @@ function Main() {
     doICE();
   };
 
-  return { onLoad, lstream, rstream, setLStream, setRStream, onStopCall };
+  return {
+    onLoad,
+    lstream,
+    rstream,
+    setLStream,
+    setRStream,
+    onStopCall,
+    startCall,
+  };
 }
 export default Main;
 
