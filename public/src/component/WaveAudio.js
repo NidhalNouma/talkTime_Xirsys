@@ -17,14 +17,12 @@ function WaveAudio({ stream, lstream }) {
   }, [rel]);
 
   useEffect(() => {
-    wave.stopStream();
-    lwave.stopStream();
-    if (stream)
-      if (stream.active)
-        wave.fromStream(stream, "wave", {
-          type: "shine",
-          colors: ["rgba(149, 54, 64,1)", "white", "blue"],
-        });
+    stream &&
+      stream.active &&
+      wave.fromStream(stream, "wave", {
+        type: "shine",
+        colors: ["rgba(149, 54, 64,1)", "white", "blue"],
+      });
 
     lstream &&
       lstream.active &&
@@ -40,7 +38,7 @@ function WaveAudio({ stream, lstream }) {
       wave.stopStream();
       lwave.stopStream();
     };
-  }, [lstream, stream, rel]);
+  }, []);
 
   return (
     <div>

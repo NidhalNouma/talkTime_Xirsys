@@ -12,7 +12,6 @@ function Call() {
   };
 
   const answer = function () {
-    console.log("answer fire");
     setState(2);
     setBtnText("End");
   };

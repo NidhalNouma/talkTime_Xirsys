@@ -99,8 +99,9 @@ module.exports = function (xirsys) {
 
 let users = [];
 
-function addUsers(user) {
-  users.push(user);
+function addUsers(userd) {
+  const u = users.find((user) => user === userd);
+  if (!u) users.push(userd);
 }
 
 function getAllUsers() {

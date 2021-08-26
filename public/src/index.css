@@ -46,10 +46,13 @@ code {
   color: white;
   font-size: 1.3rem;
   border-radius: 50%;
-  width: 85px;
-  height: 85px;
+  width: 90px;
+  height: 90px;
   cursor: pointer;
   border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .button .Call {

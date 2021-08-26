@@ -20,11 +20,13 @@ function Audio({ type = 0, answer }) {
   useEffect(() => {
     if (type === 0) {
       setLStream(null);
-      setRStream(null);
+      // setRStream(new MediaStream());
       stopAudioOnly(lstream);
       stopAudioOnly(rstream);
+      stopAudioOnly(stream);
       onStopCall();
-    } else if (type === 1) {
+    }
+    if (type === 1) {
       onLoad();
     }
 
@@ -44,20 +46,40 @@ function Audio({ type = 0, answer }) {
   //   }
   // }, [rstream]);
 
-  useEffect(() => {
-    const interval = setInterval(() => {
-      const s = rstream;
-      if (s) {
-        // console.log("rstream s ===>> ", s);
-        if (s.active) {
-          console.log("answer call");
-          setStream(s);
-          answer();
-        }
+  const [interval, setInter] = useState(null);
+  const [cnt, setCnt] = useState(0);
+
+  const intervalAnswer = () => {
+    const s = rstream;
+    console.log("rstream s ===>> ", rstream);
+    if (s) {
+      if (s.active) {
+        console.log("answer call");
+        setStream(s);
+        answer();
+      } else if (!s.active) {
+        // setCnt((c) => c + 1);
       }
-    }, 5000);
-    return () => clearInterval(interval);
-  }, []);
+    }
+  };
+
+  // useEffect(() => {
+  //   console.log("cntttt ", cnt);
+  //   if (cnt === 4) {
+  //     onStopCall();
+  //   } else if (cnt === 5) {
+  //     setCnt(0);
+  //     onLoad();
+  //   }
+  // }, [cnt]);
+
+  useEffect(() => {
+    if (type === 1 && rstream) setInter(setInterval(intervalAnswer, 5000));
+    else if (interval) {
+      clearInterval(interval);
+      setInter(null);
+    }
+  }, [type, rstream]);
 
   return type === 1 ? (
     <Loader type="Bars" color="rgba(102, 193, 113, 1)" height={80} width={80} />

@@ -73,6 +73,25 @@ function Main() {
     if (ice) ice.on(ice.onICEList, onICE);
   }, [ice]);
 
+  // const [interval, setInter] = useState(null);
+  // const intervalIce = () => {
+  //   ice.on(ice.onICEList, onICE);
+  // };
+
+  // useEffect(() => {
+  //   if (ice) {
+  //     if (rstream && !rstream.active) setInter(setInterval(intervalIce, 1000));
+  //     else if (interval && rstream && rstream.active) {
+  //       clearInterval(interval);
+  //       setInter(null);
+  //     }
+  //   }
+  // }, [rstream, ice]);
+
+  useEffect(() => {
+    if (ice) ice.on(ice.onICEList, onICE);
+  }, [ice]);
+
   useEffect(() => {
     console.log("remote Id == ", remoteCallID);
 
@@ -214,8 +233,8 @@ function Main() {
     console.log("*main*  onStopCall ");
     if (inCall) {
       peer.hangup(remoteCallID);
+      setInCall(false);
     }
-    setInCall(false);
     setRemoteCallID(null);
     setIce(null);
     setPeer(null);
@@ -358,7 +377,7 @@ function Main() {
 
   const onLoad = () => {
     console.log("pretty loaded!!");
-    setUsername(guid()); //create random local username
+    if (!username) setUsername(guid()); //create random local username
     let urlName = getURLParameter("callid"); //get call id if exists from url
     if (!!urlName) {
       setRemoteCallID(urlName);
