@@ -46,7 +46,7 @@ function Main() {
       //if the peer is created, update our media
       if (!!peer) peer.updateMediaStream(lstream);
     }
-  }, [lstream]);
+  }, [lstream, sig]);
 
   useEffect(() => {
     if (peer) {
@@ -89,10 +89,6 @@ function Main() {
   //     }
   //   }
   // }, [rstream, ice]);
-
-  useEffect(() => {
-    if (ice) ice.on(ice.onICEList, onICE);
-  }, [ice]);
 
   useEffect(() => {
     console.log("remote Id == ", remoteCallID);
@@ -138,11 +134,11 @@ function Main() {
     // }
     //gets stream object of local users a/v
     media
-      .getUserMedia(mediaConstraints)
+      .getUserMedia(mediaConstraints, setLocalStream)
       .then((str) => {
         console.log("*main*  getUser Media stream: ", str);
 
-        setLocalStream(str);
+        // setLocalStream(str);
         //create signal if null
         // if (!sig) doSignal();
         // //if the peer is created, update our media
@@ -239,12 +235,14 @@ function Main() {
     setInCall(false);
     setRemoteCallID(null);
     setIce(null);
-    setPeer(null);
-    setMedia(null);
+    // setPeer(null);
+    // setMedia(null);
     setSig(null);
     setStartCall(false);
-    setLStream(null);
-    setRStream(new MediaStream());
+    // setLStream(null);
+    // setRStream(new MediaStream());
+
+    console.log($xirsys);
 
     // setXirsys(null);
   }

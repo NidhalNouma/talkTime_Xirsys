@@ -8,11 +8,11 @@ function Audio({ type = 0, answer }) {
   const { onLoad, lstream, rstream, onStopCall, startCall } = Main();
 
   useEffect(() => {
-    console.log("Type is ==> ", type);
-    if (type === 0 && startCall) {
+    console.log("Type is ==> ", type, startCall);
+    if (type === 0) {
       stopAudioOnly(lstream);
       stopAudioOnly(rstream);
-      onStopCall();
+      if (startCall) onStopCall();
     }
     if (type === 1) {
       onLoad();
@@ -82,11 +82,8 @@ export default Audio;
 function stopAudioOnly(stream) {
   if (stream) {
     stream.getTracks().forEach(function (track) {
-      console.log("stopp streeeemmmmmmm");
-      if (track.readyState === "live" && track.kind === "audio") {
-        track.stop();
-        console.log("stoppeddd streeeemmmmmmm");
-      }
+      track.stop();
+      console.log("st", stream);
     });
   }
 }

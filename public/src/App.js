@@ -24,25 +24,6 @@ function App() {
       <div className="footer">
         <a href="/privacy">Privacy Policy</a> | <a href="/terms">Terms</a>
       </div>
-
-      {/* <section id="share-view" class="row">
-        <h3 id="share-title">Copy and Share this URL:</h3>
-        <div id="callIDView" class="input-group col-sm-8 col-sm-offset-2">
-          <input
-            id="callID"
-            type="text"
-            class="form-control"
-            aria-label="..."
-            readonly
-          />
-          <div class="input-group-btn">
-            <span id="isTURN" class="input-group-addon">
-              <input id="isTURNcb" type="checkbox" aria-label="..." />
-              <label for="isTURN"> Force TURN</label>
-            </span>
-          </div>
-        </div>
-      </section> */}
     </div>
   );
 }

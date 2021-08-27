@@ -8,6 +8,8 @@
     "build": "npm install",
     "start": "node server.js",
     "uninstall": "npm uninstall -s",
+    "gdeploy": "gcloud run deploy --image gcr.io/talktime-57dc9/talktime_xirsys",
+    "gbuild": "gcloud builds submit --tag gcr.io/talktime-57dc9/talktime_xirsys",
     "dev": "nodemon server.js"
   },
   "keywords": [],

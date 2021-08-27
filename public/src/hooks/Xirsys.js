@@ -27,12 +27,18 @@ function Xirsys(setRandomUser, rstream) {
 
     /* PUBLIC */
 
-    _md.prototype.getUserMedia = function (constraints, cbSuccess, cbFail) {
+    _md.prototype.getUserMedia = function (
+      constraints,
+      setLocalStream,
+      cbSuccess,
+      cbFail
+    ) {
       if (!constraints) constraints = { audio: true, video: true };
       //return promise
       var own = this;
       return navigator.mediaDevices.getUserMedia(constraints).then((str) => {
         own.localStream = str;
+        setLocalStream(str);
         own.emit(own.ON_LOCAL_STREAM, str);
         return str;
       });
