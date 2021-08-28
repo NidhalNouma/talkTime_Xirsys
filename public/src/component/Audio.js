@@ -5,7 +5,8 @@ import WaveAudio from "./WaveAudio";
 import Main from "../hooks/Main1";
 
 function Audio({ type = 0, answer }) {
-  const { onLoad, lstream, rstream, onStopCall, startCall } = Main();
+  const { onLoad, lstream, rstream, onStopCall, startCall, setReload, reset } =
+    Main();
 
   useEffect(() => {
     console.log("Type is ==> ", type, startCall);
@@ -15,7 +16,9 @@ function Audio({ type = 0, answer }) {
       if (startCall) onStopCall();
     }
     if (type === 1) {
-      onLoad();
+      reset();
+      // onLoad();
+      setReload(true);
     }
   }, [type]);
 

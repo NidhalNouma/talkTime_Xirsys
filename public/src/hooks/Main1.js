@@ -34,7 +34,24 @@ function Main() {
 
   const { xirsys } = Xirsys(setRemoteCallID, rstream);
 
-  const [$xirsys, setXirsys] = useState(xirsys);
+  const [$xirsys, setXirsys] = useState(null);
+
+  const [reload, setReload] = useState(false);
+
+  useEffect(() => {
+    if (reload) {
+      // onLoad();
+      setXirsys(xirsys);
+      console.log("reload ....");
+      setReload(false);
+    }
+  }, [reload]);
+
+  useEffect(() => {
+    if ($xirsys) {
+      onLoad();
+    }
+  }, [$xirsys]);
 
   useEffect(() => {
     if (lstream) {
@@ -46,7 +63,7 @@ function Main() {
       //if the peer is created, update our media
       if (!!peer) peer.updateMediaStream(lstream);
     }
-  }, [lstream, sig]);
+  }, [lstream]);
 
   useEffect(() => {
     if (peer) {
@@ -232,19 +249,23 @@ function Main() {
     if (inCall) {
       peer.hangup(remoteCallID);
     }
-    setInCall(false);
-    setRemoteCallID(null);
-    setIce(null);
-    // setPeer(null);
-    // setMedia(null);
-    setSig(null);
-    setStartCall(false);
-    // setLStream(null);
-    // setRStream(new MediaStream());
 
     console.log($xirsys);
 
     // setXirsys(null);
+  }
+
+  function reset() {
+    setInCall(false);
+    setRemoteCallID(null);
+    setIce(null);
+    setPeer(null);
+    setMedia(null);
+    setSig(null);
+    setStartCall(false);
+    setLStream(null);
+    // setRStream(new MediaStream());
+    if (media) getMyMedia();
   }
 
   /* UI METHODS */
@@ -381,6 +402,7 @@ function Main() {
 
   const onLoad = () => {
     console.log("pretty loaded!!");
+    setSig(null);
     if (!username) setUsername(guid()); //create random local username
     let urlName = getURLParameter("callid"); //get call id if exists from url
     if (!!urlName) {
@@ -389,6 +411,7 @@ function Main() {
 
     //get Xirsys service
     doICE();
+    if (reload) setReload((r) => !r);
   };
 
   return {
@@ -397,6 +420,8 @@ function Main() {
     rstream,
     onStopCall,
     startCall,
+    setReload,
+    reset,
   };
 }
 export default Main;
