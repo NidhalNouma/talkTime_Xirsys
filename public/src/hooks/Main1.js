@@ -1,6 +1,6 @@
-import $ from "jquery";
 import Xirsys from "./Xirsys";
 import { useState, useEffect } from "react";
+import { set } from "express/lib/application";
 
 function Main() {
   // const location = {};
@@ -11,11 +11,7 @@ function Main() {
   //   (RegExp("ch" + "=" + "(.+?)(&|$)").exec(location.search) || [, null])[1]
   // );
   // if (ch != "null") channelPath = ch;
-  console.log("channel path: ", channelPath);
-
-  var mediaConstraints = {
-    audio: true,
-  };
+  // console.log("channel path: ", channelPath);
 
   const [lstream, setLStream] = useState(null);
   const [rstream, setRStream] = useState(new MediaStream());
@@ -26,7 +22,7 @@ function Main() {
 
   const [peer, setPeer] = useState(null);
   const [sig, setSig] = useState(null);
-  const [media, setMedia] = useState(null);
+  // const [media, setMedia] = useState(null);
   const [ice, setIce] = useState(null);
 
   const [call, setCall] = useState(false);
@@ -85,10 +81,6 @@ function Main() {
   }, [sig]);
 
   useEffect(() => {
-    if (media) getMyMedia();
-  }, [media]);
-
-  useEffect(() => {
     if (ice) ice.on(ice.onICEList, onICE);
   }, [ice]);
 
@@ -135,35 +127,27 @@ function Main() {
   function onICE(evt) {
     console.log("onICE ", evt);
     if (evt.type === ice.onICEList) {
-      //   getMyMedia();
-      setMedia(new $xirsys.media());
+      getMyMedia();
+      // setMedia(new $xirsys.media());
     }
   }
 
   //Get local user media
   function getMyMedia() {
     console.log("getMyMedia()");
-    //setup media
-    // if (!media) {
-    //   media = new $xirsys.media();
-    media.on(media.DEVICES_UPDATED, onMediaDevices); //returns list of media devices on local user machine.
-    media.on(media.ON_LOCAL_STREAM, onMediaDevices); //returns a/v stream of local user.
-    // }
-    //gets stream object of local users a/v
-    media
-      .getUserMedia(mediaConstraints, setLocalStream)
-      .then((str) => {
-        console.log("*main*  getUser Media stream: ", str);
 
-        // setLocalStream(str);
-        //create signal if null
-        // if (!sig) doSignal();
-        // //if the peer is created, update our media
-        // if (!!peer) peer.updateMediaStream(lstream);
+    var mediaConstraints = {
+      audio: true,
+    };
+
+    navigator.mediaDevices
+      .getUserMedia(mediaConstraints)
+      .then((str) => {
+        setLocalStream(str);
       })
       .catch((err) => {
         console.log("Could not get Media: ", err);
-        alert("Could not get Media!! Please check your camera and mic.");
+        alert("Could not get Media!! Please check your camera and mic...");
       });
   }
 
@@ -256,16 +240,16 @@ function Main() {
   }
 
   function reset() {
+    setXirsys(null);
     setInCall(false);
     setRemoteCallID(null);
-    setIce(null);
-    setPeer(null);
-    setMedia(null);
-    setSig(null);
     setStartCall(false);
-    setLStream(null);
+    setIce(null);
+    setSig(null);
+    setPeer(null);
+    // setMedia(null);
+    // setLStream(null);
     // setRStream(new MediaStream());
-    if (media) getMyMedia();
   }
 
   /* UI METHODS */
@@ -290,97 +274,6 @@ function Main() {
     // setRStream(str);
     setStartCall(true);
   }
-  //update the list of media sources on UI
-  function onMediaDevices(e) {
-    console.log("*main*  onMediaDevices: ", e, " data: ", e.data);
-    switch (e.type) {
-      case media.DEVICES_UPDATED:
-        updateDevices(e.data);
-        break;
-      case media.ON_LOCAL_STREAM:
-        //update list with selected.
-        setSelectedDevices(e.data.getTracks());
-        break;
-      default:
-        break;
-    }
-  }
-
-  function updateDevices(devices) {
-    const mics = devices.audioin,
-      cams = devices.videoin;
-    console.log("*main*  updateDevices - mics:", mics, ", cams:", cams);
-    const camList = $("#ctrlMenu #camList"),
-      micList = $("#ctrlMenu #micList");
-    //camToggle = $('#ctrlMenu #camToggle'),
-    //micToggle = $('#ctrlMenu #micToggle');
-
-    micList.empty();
-    mics.forEach((device) => {
-      micList.append(
-        '<li><a id="' +
-          device.deviceId +
-          '" data-group-id="' +
-          device.groupId +
-          '" class="btn" role="button">' +
-          device.label +
-          "</a></li>"
-      );
-    });
-
-    camList.empty();
-    cams.forEach((device) => {
-      camList.append(
-        '<li><a id="' +
-          device.deviceId +
-          '" data-group-id="' +
-          device.groupId +
-          '" class="btn" role="button">' +
-          device.label +
-          "</a></li>"
-      );
-    });
-  }
-
-  function setSelectedDevices(devices) {
-    console.log("*main*  setSelectedDevices: ", devices);
-    //console.log('- video: ',devices.getVideoTracks() );
-    devices.forEach((device) => {
-      switch (device.kind) {
-        case "audio":
-          console.log("- audio toggel: ", device);
-          $("#ctrlMenu #micToggle").html(
-            device.label.substr(0, 20) + '<span class="caret"></span>'
-          );
-          break;
-        case "video":
-          console.log("- video toggel: ", device);
-          $("#ctrlMenu #camToggle").html(
-            device.label.substr(0, 20) + '<span class="caret"></span>'
-          );
-          break;
-        default:
-          break;
-      }
-    });
-  }
-
-  /* TOOLS */
-
-  // function hasMedia(label, tracks) {
-  //   console.log("tracks: ", tracks, ", label: ", label);
-  //   let l = tracks.length,
-  //     i,
-  //     hasIt = false;
-  //   for (i = 0; i < l; i++) {
-  //     let track = tracks[i];
-  //     if (track.label.indexOf(label) > -1) {
-  //       hasIt = true;
-  //       break;
-  //     }
-  //   }
-  //   return hasIt;
-  // }
 
   //gets URL parameters
   function getURLParameter(name) {
@@ -402,6 +295,9 @@ function Main() {
 
   const onLoad = () => {
     console.log("pretty loaded!!");
+
+    // getMyMedia();
+
     setSig(null);
     if (!username) setUsername(guid()); //create random local username
     let urlName = getURLParameter("callid"); //get call id if exists from url
@@ -425,5 +321,3 @@ function Main() {
   };
 }
 export default Main;
-
-// export const stream = { localStream, remoteStream };

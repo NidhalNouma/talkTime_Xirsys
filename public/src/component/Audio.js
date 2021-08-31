@@ -52,7 +52,7 @@ function Audio({ type = 0, answer }) {
   }, [type, rstream]);
 
   useEffect(() => {
-    console.log("rstream s ===>> ", rstream);
+    // console.log("rstream s ===>> ", rstream);
     if (rstream) {
       if (rstream.active) {
         console.log("answer call");
